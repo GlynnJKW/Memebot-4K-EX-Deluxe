@@ -1,0 +1,11 @@
+{
+  "name": "Memetron-4k-EX-Deluxe",
+  "version": "1.0.0",
+  "description": "The memiest discord bot ever made (plus moderation)",
+  "main": "bot.js",
+  "author": "WEDS_GARBAGEDAY",
+  "dependencies": {
+    "discord.io": "^2.5.3",
+    "winston": "^2.4.0"
+  }
+}
