@@ -1,11 +1,29 @@
 {
-  "name": "Memetron-4k-EX-Deluxe",
+  "name": "memetron-4k-ex-deluxe",
   "version": "1.0.0",
   "description": "The memiest discord bot ever made (plus moderation)",
-  "main": "bot.js",
   "author": "WEDS_GARBAGEDAY",
   "dependencies": {
     "discord.io": "^2.5.3",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
     "winston": "^2.4.0"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WEDSGARBAGEDAY/Memebot-4K-EX-Deluxe.git"
+  },
+  "keywords": [
+    "discord"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WEDSGARBAGEDAY/Memebot-4K-EX-Deluxe/issues"
+  },
+  "homepage": "https://github.com/WEDSGARBAGEDAY/Memebot-4K-EX-Deluxe#readme"
 }
