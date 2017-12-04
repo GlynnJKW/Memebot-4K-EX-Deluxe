@@ -4,9 +4,9 @@
   "description": "The memiest discord bot ever made (plus moderation)",
   "author": "WEDS_GARBAGEDAY",
   "dependencies": {
-    "discord.io": "^2.5.3",
-    "ejs": "^2.5.7",
-    "express": "^4.16.2",
+    "discord.js": "^11.2.1",
+    "ffmpeg-binaries": "^3.2.2-3",
+    "node-opus": "^0.2.7",
     "winston": "^2.4.0"
   },
   "devDependencies": {},
