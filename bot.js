@@ -42,7 +42,7 @@ var commands = {
     "desc": "Replies 'Pong!' to ping",
     "call": function(fn_args, fn_message){
       fn_message.reply("Pong!");
-    }
+    },
     "authorized": function(fn_message){
       return true;
     }
@@ -76,9 +76,9 @@ var commands = {
       return true;
     }
   },
-  "skip": {
-    "args": ["number"],
-    "desc": "Skips # of songs/files provided, if none provided then default is 1",
+  "showqueue": {
+    "args": [],
+    "desc": "Shows queue of songs/files",
     "call": function(fn_args, fn_message){
       let queueString = "";
       for(let queueCount = 0; queueCount < playQueue.length; queueCount++){
@@ -90,9 +90,9 @@ var commands = {
       return true;
     }
   },
-  "showqueue": {
-    "args": [],
-    "desc": "Shows queue of songs/files",
+  "skip": {
+    "args": ["number"],
+    "desc": "Skips # of songs/files provided, if none provided then default is 1",
     "call": function(fn_args, fn_message){
       if(currentlyPlaying){
         currentlyPlaying.end();
@@ -109,7 +109,7 @@ var commands = {
       if(fn_message.member.voiceChannel && !bot_voicechannel && !currentlyPlaying){
         bot_voicechannel = fn_message.member.voiceChannel;
         bot_voicechannel.join().then(dyn_connection => {
-          currentlyPlaying = dyn_connection.playFile('./audio/' + args[0]);
+          currentlyPlaying = dyn_connection.playFile('./audio/' + fn_args[0]);
           readyNextPlay(dyn_connection);
           //currentlyPlaying.on('end', end =>{
             //currentlyPlaying = null;
@@ -118,7 +118,7 @@ var commands = {
       }
       else if(!currentlyPlaying){
         const broadcast = bot.createVoiceBroadcast();
-        currentlyPlaying = broadcast.playFile('./audio/' + args[0]);
+        currentlyPlaying = broadcast.playFile('./audio/' + fn_args[0]);
         readyNextPlay(broadcast);
         //currentlyPlaying.on('end', end => {
           //currentlyPlaying = null;
@@ -129,7 +129,7 @@ var commands = {
       }
       else{
         fn_message.reply('added ' + fn_args[0] + ' to queue');
-        playQueue.push(args[0]);
+        playQueue.push(fn_args[0]);
         //console.log(currentlyPlaying._events.end.toString());
       }
     },
@@ -172,6 +172,7 @@ bot.on('message', message => {
     // for this script it will listen for messages that will start with `!`
     //console.log(message);
     if (message.content.substring(0, 1) == '!') {
+        let userPermissions = new Discord.Permissions(message.member, message.member.roles.reduce(function(a, c){return a | c.permissions}));
         var args = message.content.substring(1).split(' ');
         var cmd = args[0];
 
@@ -184,7 +185,7 @@ bot.on('message', message => {
         }
 
         if(commands[cmd] && commands[cmd].authorized(message)){
-          commands[cmd].call(message, args);
+          commands[cmd].call(args, message);
         }
     }
 });
