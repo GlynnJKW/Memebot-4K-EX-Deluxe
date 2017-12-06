@@ -1,0 +1,37 @@
+{
+  "ping": {
+    "args": [],
+    "desc": "Replies 'Pong!' to ping",
+    "func": "ping"
+  },
+  "join": {
+    "args": [],
+    "desc": "Joins calling user's current voice channel",
+    "func": "join"
+  },
+  "leave": {
+    "args": [],
+    "desc": "Leaves voice channel if in one",
+    "func": "leave"
+  },
+  "skip": {
+    "args": ["number"],
+    "desc": "Skips # of songs/files provided, if none provided then default is 1",
+    "func": "skip"
+  },
+  "showqueue": {
+    "args": [],
+    "desc": "Shows queue of songs/files",
+    "func": "showqueue"
+  },
+  "play": {
+    "args": ["filename"],
+    "desc": "Adds file to queue if available, also joins calling user's voice channel if not already in a channel",
+    "func": "play"
+  },
+  "alias":{
+    "args": ["add/delete", "alias", "command"],
+    "desc": "Adds/deletes alias of a command",
+    "func": "alias"
+  }
+}

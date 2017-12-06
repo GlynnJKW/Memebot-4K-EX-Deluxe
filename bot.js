@@ -36,6 +36,129 @@ var readyNextPlay = function(conn){
   });
 };
 
+var commands = {
+  "ping": {
+    "args": [],
+    "desc": "Replies 'Pong!' to ping",
+    "call": function(fn_args, fn_message){
+      fn_message.reply("Pong!");
+    }
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "join": {
+    "args": [],
+    "desc": "Joins calling user's current voice channel",
+    "call": function(fn_args, fn_message){
+      if(fn_message.member.voiceChannel){
+        bot_voicechannel = fn_message.member.voiceChannel;
+        bot_connection = bot_voicechannel.join();
+      }
+      else{
+        message.reply('Join a voice channel first!');
+      }
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "leave": {
+    "args": [],
+    "desc": "Leaves voice channel if in one",
+    "call": function(fn_args, fn_message){
+      if(bot_voicechannel){
+        bot_voicechannel.leave();
+        bot_voicechannel = null;
+      }
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "skip": {
+    "args": ["number"],
+    "desc": "Skips # of songs/files provided, if none provided then default is 1",
+    "call": function(fn_args, fn_message){
+      let queueString = "";
+      for(let queueCount = 0; queueCount < playQueue.length; queueCount++){
+        queueString += '\n' + playQueue[queueCount];
+      }
+      fn_message.reply(queueString);
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "showqueue": {
+    "args": [],
+    "desc": "Shows queue of songs/files",
+    "call": function(fn_args, fn_message){
+      if(currentlyPlaying){
+        currentlyPlaying.end();
+      }
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "play": {
+    "args": ["filename"],
+    "desc": "Adds file to queue if available, also joins calling user's voice channel if not already in a channel",
+    "call": function(fn_args, fn_message){
+      if(fn_message.member.voiceChannel && !bot_voicechannel && !currentlyPlaying){
+        bot_voicechannel = fn_message.member.voiceChannel;
+        bot_voicechannel.join().then(dyn_connection => {
+          currentlyPlaying = dyn_connection.playFile('./audio/' + args[0]);
+          readyNextPlay(dyn_connection);
+          //currentlyPlaying.on('end', end =>{
+            //currentlyPlaying = null;
+          //});
+        });
+      }
+      else if(!currentlyPlaying){
+        const broadcast = bot.createVoiceBroadcast();
+        currentlyPlaying = broadcast.playFile('./audio/' + args[0]);
+        readyNextPlay(broadcast);
+        //currentlyPlaying.on('end', end => {
+          //currentlyPlaying = null;
+        //});
+        for (const connection of bot.voiceConnections.values()) {
+          connection.playBroadcast(broadcast);
+        }
+      }
+      else{
+        fn_message.reply('added ' + fn_args[0] + ' to queue');
+        playQueue.push(args[0]);
+        //console.log(currentlyPlaying._events.end.toString());
+      }
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  },
+  "alias":{
+    "args": ["add/delete", "alias", "command"],
+    "desc": "Adds/deletes alias of a command",
+    "call": function(fn_args, fn_message){
+      if(fn_args[0] == 'add'){
+        let al_alias = fn_args[1];
+        fn_args = fn_args.splice(2);
+        aliases[al_alias] = fn_args;
+      }
+      else if(fn_args[0] == 'delete'){
+        if(aliases[fn_args[1]]){
+          delete aliases[fn_args[1]];
+        }
+      }
+      fs.writeFile('aliases.json', JSON.stringify(aliases), 'utf8', function(){});
+    },
+    "authorized": function(fn_message){
+      return true;
+    }
+  }
+};
+
 bot.login(auth.token);
 
 bot.on('ready', function (evt) {
@@ -60,80 +183,8 @@ bot.on('message', message => {
           args = args.splice(1);
         }
 
-        switch(cmd) {
-            // !ping
-            case 'ping':
-                message.reply('Pong!');
-                break;
-            case 'join':
-              if(message.member.voiceChannel){
-                bot_voicechannel = message.member.voiceChannel;
-                bot_connection = bot_voicechannel.join();
-              }
-              else{
-                message.reply('Join a voice channel first!');
-              }
-              break;
-            case 'leave':
-              if(bot_voicechannel){
-                bot_voicechannel.leave();
-                bot_voicechannel = null;
-              }
-              break;
-            case 'skip':
-              if(currentlyPlaying){
-                currentlyPlaying.end();
-              }
-              break;
-            case 'showqueue':
-              let queueString = "";
-              for(let queueCount = 0; queueCount < playQueue.length; queueCount++){
-                queueString += '\n' + playQueue[queueCount];
-              }
-              message.reply(queueString);
-              break;
-            case 'play':
-              if(message.member.voiceChannel && bot_voicechannel != message.member.voiceChannel && !currentlyPlaying){
-                bot_voicechannel = message.member.voiceChannel;
-                bot_voicechannel.join().then(dyn_connection => {
-                  currentlyPlaying = dyn_connection.playFile('./audio/' + args[0]);
-                  readyNextPlay(dyn_connection);
-                  //currentlyPlaying.on('end', end =>{
-                    //currentlyPlaying = null;
-                  //});
-                });
-              }
-              else if(!currentlyPlaying){
-                const broadcast = bot.createVoiceBroadcast();
-                currentlyPlaying = broadcast.playFile('./audio/' + args[0]);
-                readyNextPlay(broadcast);
-                //currentlyPlaying.on('end', end => {
-                  //currentlyPlaying = null;
-                //});
-                for (const connection of bot.voiceConnections.values()) {
-                  connection.playBroadcast(broadcast);
-                }
-              }
-              else{
-                message.reply('added ' + args[0] + ' to queue');
-                playQueue.push(args[0]);
-                //console.log(currentlyPlaying._events.end.toString());
-              }
-              break;
-            case 'alias':
-              if(args[0] == 'add'){
-                let al_alias = args[1];
-                args = args.splice(2);
-                aliases[al_alias] = args;
-              }
-              else if(args[0] == 'delete'){
-                if(aliases[args[1]]){
-                  delete aliases[args[1]];
-                }
-              }
-              fs.writeFile('aliases.json', JSON.stringify(aliases), 'utf8', function(){});
-              break;
-            default:
+        if(commands[cmd] && commands[cmd].authorized(message)){
+          commands[cmd].call(message, args);
         }
     }
 });
